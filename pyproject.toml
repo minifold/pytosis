@@ -8,11 +8,6 @@ readme = "README.org"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-scipy = "^1.11.1"
-astropy = "^5.3.0"
-numpy = "^1.25.1"
-matplotlib = "^3.7.2"
-
 
 [build-system]
 requires = ["poetry-core"]
