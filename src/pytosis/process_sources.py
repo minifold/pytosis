@@ -76,7 +76,7 @@ def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
     """
     Parameters
     ----------
-    tabledata :
+    data : array-like
     M :
     source_nums :
         number of sources.
@@ -102,14 +102,20 @@ def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
     A = data[wlen:(channels // 4) - bandlen, :]
     B = data[(channels // 4) + bandlen:(channels // 2) - wlen + 1, :]
 
+    # S_1
     s1_red = np.sum(A, axis=1)
     s1_grn = np.sum(B, axis=1)
 
+    # S_2
     s2_red = np.sum(A ** 2, axis=1)
     s2_grn = np.sum(B ** 2, axis=1)
 
-    var_red = np.var(A)
-    var_grn = np.var(B)
+    d_red = np.mean(A, axis=1) ** 2 / np.median(np.var(A, ddof=1))
+    d_grn = np.mean(B, axis=1) ** 2 / np.median(np.var(B, ddof=1))
 
-    d_red = np.mean(A, axis=1) ** 2 / np.median(var_red)
-    d_grn = np.mean(B, axis=1) ** 2 / np.median(var_grn)
+
+def plot_histogram(M):
+    """
+    """
+    if (M == 300):
+        sample =

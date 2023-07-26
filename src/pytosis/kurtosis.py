@@ -7,10 +7,11 @@ Alex Cingoranelli, University of Central Florida
 """
 
 import numpy as np
+from scipy.stats import pearson3
 
 
 class Kurtosis:
-    def __init__(self, n=1, d=1):
+    def __init__(self, n: int = 1, d: int = 1):
         """
         Initializes the Kurtosis class.
 

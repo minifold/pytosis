@@ -82,12 +82,6 @@ upperThreshold = fzero(@(x) myfun(x,rho,q),max(SK));
 % end
 % set(gca,'YScale','log')
 
-
-
-
-
-
 end
 
 % Pearson Type IV Probability Distribution Function
-
