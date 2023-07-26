@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pytosis"
+version = "0.1.0"
+description = "Spectral Kurtosis package for finding and removing RFI"
+authors = ["A. Cingoranelli <49851131+minifold@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.org"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+scipy = "^1.11.1"
+astropy = "^5.3.0"
+numpy = "^1.25.1"
+matplotlib = "^3.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -87,13 +87,13 @@ class Kurtosis:
         num_spectra = data.shape[1] // M
 
         for i in range(num_spectra):
-            #
-            s_i = s[:, i * M:(i + 1) * M]
+            s_i = data[:, i * M:(i + 1) * M]
+
             if i == 0:
-                out_sk = np.expand_dims(est_s1s2(s_i, M), axis=1)
+                out_sk = np.expand_dims(self.est_s1s2(s_i, M), axis=1)
                 out_s = np.expand_dims(np.mean(s_i, axis=1), axis=1)
             else:
-                out_sk = np.c_[out_sk, est_s1s2(s_i, M)]
+                out_sk = np.c_[out_sk, self.est_s1s2(s_i, M)]
                 out_s = np.c_[out_s, np.mean(s_i, axis=1)]
 
         return out_sk, out_s

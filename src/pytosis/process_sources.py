@@ -9,7 +9,6 @@ Dr. Emmanuel J. Morales Butler, University of Puerto Rico,
 import os
 import numpy as np
 from astropy.io import fits
-from scipy.stats import pearson3
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
@@ -117,5 +116,6 @@ def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
 def plot_histogram(M):
     """
     """
+    # When M = 300 seconds
     if (M == 300):
         sample =

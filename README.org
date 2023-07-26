@@ -1,0 +1,15 @@
+#+title: Pytosis
+#+subtitle: A Spectral Kurtosis package for removing RFI
+
+* Getting Started
+
+* Installation
+Package will be posted to PyPI. It should be a simple case of running
+
+#+begin_src bash
+pip install pytosis
+#+end_src
+
+* Using the Command Line
+
+* References
