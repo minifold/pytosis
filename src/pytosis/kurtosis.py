@@ -28,14 +28,14 @@ class Kurtosis:
 
         """
         self.data = data
-        self.n = n
+        self.n = n  # the number of channels
         self.d = d
-        self.M = M
+        self.M = M  # the number of seconds
 
         if self.data is not None:
-            return self.est_s1s2(self.data, self.M)
+            return self.sk_estimator(self.data, self.M)
 
-    def est_s1s2(self, data, M):
+    def sk_estimator(self, data, M):
         """
         Parameters
         ----------

@@ -9,8 +9,12 @@ Dr. Emmanuel J. Morales Butler, University of Puerto Rico,
 import os
 import numpy as np
 from astropy.io import fits
+from astropy.stats import histogram
+from scipy.stats import pearson3
+
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+
 
 from kurtosis import Kurtosis as K
 
@@ -71,7 +75,7 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
 
 
 def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
-                          bandlen=None):
+                          bandlen=400):
     """
     Parameters
     ----------
@@ -86,37 +90,62 @@ def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
 
     # TODO This variable represents the length of the band artifact that is
     # present on all 12 meter data at Arecibo.
-    # This will be added to the function definition such that if a telescope
-    # does not have this specific band shape, this may be set to None.
-    bandlen = 400
+    # If a telescope does not have this specific band shape, this may be set to
+    # `None`. There should probably be a better default here.
+    if bandlen is None:
+        bandlen = 0
 
     # We split the data into its two separate polarizations and save them as A
     # and B respectively.
     A = np.zeroes(M, channels // 2 - wlen * 2 - bandlen * 2)
     B = np.zeroes(M, channels // 2 - wlen * 2 - bandlen * 2)
 
-    # I have already converted the data into a 2d array through the read_fits
+    # I have already converted the data into a 2d array through the `read_fits`
     # method. Now we need to remove the artifacts that are known issues.
     # Clip the data to remove the central peak and "wings" of the spectra.
     A = data[wlen:(channels // 4) - bandlen, :]
     B = data[(channels // 4) + bandlen:(channels // 2) - wlen + 1, :]
 
-    k_red = K()
-    # S_1
-    # s1_red = np.sum(A, axis=1)
-    # s1_grn = np.sum(B, axis=1)
-
-    # # S_2
-    # s2_red = np.sum(A ** 2, axis=1)
-    # s2_grn = np.sum(B ** 2, axis=1)
-
-    # d_red = np.mean(A, axis=1) ** 2 / np.median(np.var(A, ddof=1))
-    # d_grn = np.mean(B, axis=1) ** 2 / np.median(np.var(B, ddof=1))
+    # The following are both taken care of when the kurtosis class is initialized.
+    k = K()
+    ks_red = k.sk_estimator(A, M)
+    ks_grn = k.sk_estimator(B, M)
 
 
-def plot_histogram(M):
+def plot_histogram(M, sk_red, sk_grn):
     """
     """
     # When M = 300 seconds
     if (M == 300):
-        sample =
+        sample = sk_red[np.where(sk_red < 1.5)]
+    else:
+        sample = sk_red[np.where(sk_red < 5.0)]
+
+    sample_mean = np.mean(sample)
+    (ym, bin_edges) = histogram(sample, bins="scott", density=True)
+
+    # xm = ~bin_edges
+    if bin_edges is not None:
+        binwidth = bin_edges[1] - bin_edges[0]
+
+    # i_max = np.min(np.where(ym == np.max(ym)))
+    # # I'm not exactly sure what this does.
+    # # FIXME After changing the estimator this will probably not be necessary.
+    # # This part of the code is to shift the curve to the right.
+    # if (i_max + 5) < len(ym):
+    #     # Why is there a 5 here?
+    #     i_max = i_max + 5
+
+    # while ym[i_max] > ym[i_max + 1] & i_max + 1 < len(ym):
+    #     i_max = i_max + 1
+
+    # i_min = i_max - 5 if i_max - 5 > 1 else i_max
+
+    # while ym[i_min] > ym[i_min - 1] & i_min - 1 > 1:
+    #     i_min = i_min - 1
+
+    # x = xm[i_min:i_max] + 0.5 * binwidth * np.ones(len(xm[i_min:i_max]))
+
+
+if __name__ == "__main__":
+    pass
