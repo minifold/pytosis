@@ -11,18 +11,29 @@ from scipy.stats import pearson3
 
 
 class Kurtosis:
-    def __init__(self, n: int = 1, d: int = 1):
+    def __init__(self, data=None, M=300, n: int = 1, d: [float, None] = None):
         """
         Initializes the Kurtosis class.
 
         Parameters
         ----------
+        data : array-like, optional
+            The spectral data to be passed in by the user. Optional in case one
+            desires to call the class and then initialize the S1 and S2 parameters
+            independently.
+        M : int, optional
+            number of spectral estimates. Defaults to 5 minutes, or 300 seconds.
         n : int, optional
         d : int, optional
 
         """
+        self.data = data
         self.n = n
         self.d = d
+        self.M = M
+
+        if self.data is not None:
+            return self.est_s1s2(self.data, self.M)
 
     def est_s1s2(self, data, M):
         """
@@ -59,6 +70,10 @@ class Kurtosis:
         a = data[:, :M] * self.n
         s1 = np.sum(a, axis=1)
         s2 = np.sum(np.square(a), axis=1)
+
+        if self.d is None:
+            self.d = np.mean(a, axis=1) ** 2 / np.median(np.var(a, ddof=1))
+
         return ((M * self.n * self.d + 1) / (M - 1)) * ((M * (s2 / np.square(s1))) - 1.)
 
     def single_scale(self, data, M):
