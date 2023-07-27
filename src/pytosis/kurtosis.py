@@ -7,7 +7,7 @@ Alex Cingoranelli, University of Central Florida
 """
 
 import numpy as np
-from scipy.stats import pearson3
+from scipy.stats import pearson3, skew, kurtosis
 
 
 class Kurtosis:
@@ -22,8 +22,9 @@ class Kurtosis:
             desires to call the class and then initialize the S1 and S2 parameters
             independently.
         M : int, optional
-            number of spectral estimates. Defaults to 5 minutes, or 300 seconds.
+            The number of spectral estimates. Defaults to 5 minutes, or 300 seconds.
         n : int, optional
+            The number of spectral channels.
         d : int, optional
 
         """
@@ -54,8 +55,8 @@ class Kurtosis:
         The $SK$ estimator for a set of M samples in the same freq. channel is defined as
         .. math: $\hat{SK} = \hat{V}_k^2 = \frac{\hat{\sigma}^2}{\hat{\mu}^2}$
         The summations $S_1$ and $S_2$ are the summations of the
-        .. math: $S_1 = \Sum{\hat{P_ki}}$
-        .. math: $S_2 = \Sum{\left(\hat{P_ki}\right)^{2}}$
+        .. math: $S_1 = \Sum{\Sum{\hat{P_ki}}}$
+        .. math: $S_2 = \Sum{\Sum{\left(\hat{P_ki}\right)}^{2}}$
         ..
         If N spectra are averaged together before passing through the $\hat{SK}$
         detection, then the previous equation becomes
@@ -68,18 +69,21 @@ class Kurtosis:
         """
 
         a = data[:, :M] * self.n
-        s1 = np.sum(a, axis=1)
-        s2 = np.sum(np.square(a), axis=1)
+        s1 = np.sum(np.sum(a, axis=1), axis=0)
+        s2 = np.sum(np.sum(a, axis=1) ** 2, axis=0)
 
         if self.d is None:
-            self.d = np.mean(a, axis=1) ** 2 / np.median(np.var(a, ddof=1))
+            self.d = np.mean(a, axis=1) ** 2 / np.var(a, ddof=1)
+            # Based on previous variance calculation where we take the median
+            # of the variance
+            # self.d = np.mean(a, axis=1) ** 2 / np.median(np.var(a, ddof=1))
 
         return ((M * self.n * self.d + 1) / (M - 1)) * ((M * (s2 / np.square(s1))) - 1.)
 
     def single_scale(self, data, M):
         """
         Calculates the single-scale Spectral Kurtosis routine as specified in
-        Smith 2022.
+        Smith 2022 and Nita 2010.
 
         Parameters
         ----------
@@ -105,13 +109,17 @@ class Kurtosis:
             s_i = data[:, i * M:(i + 1) * M]
 
             if i == 0:
-                out_sk = np.expand_dims(self.est_s1s2(s_i, M), axis=1)
+                out_sk = np.expand_dims(self.sk_estimator(s_i, M), axis=1)
                 out_s = np.expand_dims(np.mean(s_i, axis=1), axis=1)
             else:
-                out_sk = np.c_[out_sk, self.est_s1s2(s_i, M)]
+                out_sk = np.c_[out_sk, self.sk_estimator(s_i, M)]
                 out_s = np.c_[out_s, np.mean(s_i, axis=1)]
 
         return out_sk, out_s
+
+    def pearson_criterion():
+        mu_2 = np.var(sample)
+        mu_3 = skew(sample)
 
     def sk_edit(self, data, w):
         """
@@ -119,7 +127,7 @@ class Kurtosis:
         w :
         """
 
-        kurtosis = np.array([self.est_s1s2(i) for i in data.T])
+        kurtosis = np.array([self.sk_estimator(i) for i in data.T])
         thresh = (1. + 100/data.T.shape[1]) * np.nanmedian(kurtosis)
         w[:, kurtosis >= thresh] = 0
         return kurtosis, w

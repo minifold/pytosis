@@ -15,7 +15,6 @@ from scipy.stats import pearson3
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-
 from kurtosis import Kurtosis as K
 
 
@@ -127,24 +126,6 @@ def plot_histogram(M, sk_red, sk_grn):
     # xm = ~bin_edges
     if bin_edges is not None:
         binwidth = bin_edges[1] - bin_edges[0]
-
-    # i_max = np.min(np.where(ym == np.max(ym)))
-    # # I'm not exactly sure what this does.
-    # # FIXME After changing the estimator this will probably not be necessary.
-    # # This part of the code is to shift the curve to the right.
-    # if (i_max + 5) < len(ym):
-    #     # Why is there a 5 here?
-    #     i_max = i_max + 5
-
-    # while ym[i_max] > ym[i_max + 1] & i_max + 1 < len(ym):
-    #     i_max = i_max + 1
-
-    # i_min = i_max - 5 if i_max - 5 > 1 else i_max
-
-    # while ym[i_min] > ym[i_min - 1] & i_min - 1 > 1:
-    #     i_min = i_min - 1
-
-    # x = xm[i_min:i_max] + 0.5 * binwidth * np.ones(len(xm[i_min:i_max]))
 
 
 if __name__ == "__main__":
