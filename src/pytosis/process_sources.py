@@ -15,7 +15,7 @@ from scipy.stats import pearson3
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-from kurtosis import Kurtosis as K
+from kurtosis import SpectralKurtosis as SK
 
 
 def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
@@ -73,6 +73,19 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
     return data
 
 
+def histbins(M, sk):
+    """
+    """
+    # When M = 300 seconds
+    if (M == 300):
+        sample = sk[np.where(sk < 1.5)]
+    else:
+        sample = sk[np.where(sk < 5.0)]
+
+    ym, bin_edges = histogram(sample, bins="scott", density=True)
+    return ym, bin_edges
+
+
 def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
                           bandlen=400):
     """
@@ -106,27 +119,21 @@ def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
     B = data[(channels // 4) + bandlen:(channels // 2) - wlen + 1, :]
 
     # The following are both taken care of when the kurtosis class is initialized.
-    k = K()
-    ks_red = k.sk_estimator(A, M)
-    ks_grn = k.sk_estimator(B, M)
+    k = SK()
+    sk_red = k.sk_estimator(A)
+    sk_grn = k.sk_estimator(B)
 
-
-def plot_histogram(M, sk_red, sk_grn):
-    """
-    """
-    # When M = 300 seconds
-    if (M == 300):
-        sample = sk_red[np.where(sk_red < 1.5)]
-    else:
-        sample = sk_red[np.where(sk_red < 5.0)]
-
-    sample_mean = np.mean(sample)
-    (ym, bin_edges) = histogram(sample, bins="scott", density=True)
-
-    # xm = ~bin_edges
-    if bin_edges is not None:
-        binwidth = bin_edges[1] - bin_edges[0]
+    ym_red, edges_red = histbins(M, sk_red)
+    ym_grn, edges_grn = histbins(M, sk_grn)
 
 
 if __name__ == "__main__":
     pass
+
+# K = Nd
+# theta = a / N
+# mu = Nd * a/N
+# mu = da
+# var = k * theta ^ 2
+# var = da^2 / N
+# d = mu ^ 2 / N var

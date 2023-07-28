@@ -8,10 +8,11 @@ Alex Cingoranelli, University of Central Florida
 
 import numpy as np
 from scipy.stats import pearson3, skew, kurtosis
+from scipy.optimize import fsolve
 
 
-class Kurtosis:
-    def __init__(self, data=None, M=300, n: int = 1, d: [float, None] = None):
+class SpectralKurtosis:
+    def __init__(self, data=None, M: int = 300, N: int = 2929, d: [float, None] = None):
         """
         Initializes the Kurtosis class.
 
@@ -23,21 +24,34 @@ class Kurtosis:
             independently.
         M : int, optional
             The number of spectral estimates. Defaults to 5 minutes, or 300 seconds.
-        n : int, optional
-            The number of spectral channels.
+        N : int, optional
+            The number of instantaneous FFT PSD spectra taken per second. Defaults to 2929 PSDs,
+            which is the amount of spectra produced at a bandwidth of 24 MHz.
         d : int, optional
 
+        Returns
+        -------
+
+        See
+        ---
         """
         self.data = data
-        self.n = n  # the number of channels
-        self.d = d
-        self.M = M  # the number of seconds
+        # the number of instantaneous FFT spectra taken by the mock spectrograph per second.
+        self.N = N
+        self.d = d    #
+        self.M = M    # the number of seconds
+
+        self.pearson3_ccdf = lambda x, a, b, d: 1 - pearson3.cdf(x - d, a, b)
 
         if self.data is not None:
-            return self.sk_estimator(self.data, self.M)
+            return self.sk_estimator(self.data)
 
-    def sk_estimator(self, data, M):
+    def sk_estimator(self, data):
         """
+        This makes several assumptions about the data: it is defined as
+        .. math: $\langle P \rangle = \Sum{P_i}_{i=1} / N$
+        Which is the PSD averaged over 24 * 2 MHz. One PSD will take 0.34 ms to complete.
+
         Parameters
         ----------
         data : array-like
@@ -68,17 +82,19 @@ class Kurtosis:
         https://www.jstor.org/stable/10.1086/520938
         """
 
-        a = data[:, :M] * self.n
-        s1 = np.sum(np.sum(a, axis=1), axis=0)
-        s2 = np.sum(np.sum(a, axis=1) ** 2, axis=0)
+        # <P> for M spectra
+        P = data[:, :self.M]
+        s1 = np.sum(P, axis=1)
+        s2 = np.sum(np.square(P), axis=1)
 
         if self.d is None:
-            self.d = np.mean(a, axis=1) ** 2 / np.var(a, ddof=1)
+            self.d = np.mean(P, axis=1) ** 2 / (np.var(P, ddof=1) * self.N)
             # Based on previous variance calculation where we take the median
             # of the variance
             # self.d = np.mean(a, axis=1) ** 2 / np.median(np.var(a, ddof=1))
 
-        return ((M * self.n * self.d + 1) / (M - 1)) * ((M * (s2 / np.square(s1))) - 1.)
+        return ((self.M * self.N * self.d + 1) / (self.M - 1)) * \
+               ((self.M * (s2 / np.square(s1))) - 1.)
 
     def single_scale(self, data, M):
         """
@@ -117,10 +133,6 @@ class Kurtosis:
 
         return out_sk, out_s
 
-    def pearson_criterion():
-        mu_2 = np.var(sample)
-        mu_3 = skew(sample)
-
     def sk_edit(self, data, w):
         """
         data : 2D array-like
@@ -132,4 +144,39 @@ class Kurtosis:
         w[:, kurtosis >= thresh] = 0
         return kurtosis, w
 
-    # Threshold
+    def estimate_threshold(self, data, rho=0.0013499):
+        """
+        Estimates the upper and lower thresholds of the function using
+
+        Parameters
+        ----------
+        data : array-like
+        rho : float, optional
+             1 - 3$\sigma$ = 0.0013499
+        Returns
+        -------
+        upper : int
+            Upper threshold as given by the Pearson III CCDF
+        lower : int
+            Lower threshold as given by the Pearson III CDF
+
+        Notes
+        -----
+        .. math: $\beta_1 = \frac{\mu_3^2}{\mu_2^2}$
+        .. math: $\beta_2 = \frac{mu_4}{mu_2^2}$
+
+        .. math: $\alpha = \frac{\mu_3}{2 \mu_2}$
+        .. math: $\beta = \frac{4 \mu_2^3}{mu_3 ** 2}$
+        delta = 1 - (2 * mu_2 ** 2) / mu_3
+
+        # k = (beta_1 * (beta_2 + 3) ** 2) \
+        #   / (4 * (4 * beta_2 - 3 * beta_1) * (2 * beta_2 - 3 * beta_1 - 6))
+        """
+
+        mu_2 = np.var(data)
+        mu_3 = skew(data)
+        mu_4 = kurtosis(data)
+
+        upper = fsolve(self.pearson3_ccdf(), 1, args=(mu_2, mu_3, rho))
+        lower = fsolve(pearson3.cdf(), 1, args=(mu_2, mu_3, rho))
+        return upper, lower

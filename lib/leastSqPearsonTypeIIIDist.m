@@ -80,28 +80,8 @@ function y=yth(x,binWidth,ym_total,q)
         q(2) = 10^(-100);
     end
     
-%     if(q(3)<=0)
-%         q(3) = 10^(-100);
-%     end
-%     
-%     if(q(3)>1.0)
-%         q(3) = 1.0;
-%     end
-    
 %     y = binWidth*ym_total*pdf('Beta',x,q(1),q(2));
 y = pearsonTypeIIIpdf(x,q);
-%     y = pdf('Gamma',x,q(1),q(2));
-%     y = binWidth*ym_total*pdf('InverseGaussian',x,q(1),q(2));
-%     y = binWidth*ym_total*pdf('Logistic',x,q(1),q(2));    
-%     y = binWidth*ym_total*pdf('LogLogistic',x,q(1),q(2));
-%     y = binWidth*ym_total*pdf('Normal',x,q(1),q(2));
-%     y = binWidth*ym_total*pdf('Lognormal',x,q(1),q(2));
-%     y = binWidth*ym_total*pdf('Weibull',x,q(1),q(2));
-
-%     y = gampdf(x,q(1),q(2));
-
-%endfunction
-
 
 function e=myfun(xm, ym, wm, q)
    e = wm.*( yth(xm, q) - ym );
