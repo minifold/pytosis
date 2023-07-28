@@ -12,7 +12,14 @@ astropy = ">=4.3.1"
 scipy = ">=1.2.1"
 matplotlib = ">=3.0.0"
 
+[tool.ruff]
+select = [
+    "D",
+]
 
+[tool.ruff.pydocstyle]
+convention = "numpy"  # Accepts: "google", "numpy", or "pep257".
+#
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

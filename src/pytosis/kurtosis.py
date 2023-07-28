@@ -12,9 +12,19 @@ from scipy.optimize import fsolve
 
 
 class SpectralKurtosis:
+    """Functions for computing Spectral Kurtosis.
+
+    Methods
+    -------
+    pearson3_ccdf(x, a, b, d)
+    sk_estimator(data)
+    single_scale(data, M=None)
+    sk_edit(data, w)
+    estimate_threshold(data, rho=0.0013499)
+    """
+
     def __init__(self, data=None, M: int = 300, N: int = 2929, d: [float, None] = None):
-        """
-        Initializes the Kurtosis class.
+        """Initialize the Kurtosis class.
 
         Parameters
         ----------
@@ -31,7 +41,6 @@ class SpectralKurtosis:
 
         Returns
         -------
-
         See
         ---
         """
@@ -41,14 +50,33 @@ class SpectralKurtosis:
         self.d = d    #
         self.M = M    # the number of seconds
 
-        self.pearson3_ccdf = lambda x, a, b, d: 1 - pearson3.cdf(x - d, a, b)
-
         if self.data is not None:
             return self.sk_estimator(self.data)
 
-    def sk_estimator(self, data):
+    def pearson3_ccdf(x, a, b, d):
+        """Perform the complementary Pearson III CDF.
+
+        Parameters
+        ----------
+        x : array-like
+        a : float
+            alpha parameter
+        b : float
+            beta parameter
+        d : float
+            delta parameter
+
+        Returns
+        -------
+        _ : array-like
         """
-        This makes several assumptions about the data: it is defined as
+        return 1 - pearson3.cdf(x - d, a, b)
+
+    def sk_estimator(self, data):
+        r"""Perform the spectral kurtosis estimation function $\textbb{\hat{SK}}$.
+
+        The `sk_estimator` function makes several assumptions about the data:
+        It is defined as:
         .. math: $\langle P \rangle = \Sum{P_i}_{i=1} / N$
         Which is the PSD averaged over 24 * 2 MHz. One PSD will take 0.34 ms to complete.
 
@@ -81,7 +109,6 @@ class SpectralKurtosis:
         Section 3.1 Spectral Kurtosis Estimator, eqns 19-21 of Nita et. al 2007
         https://www.jstor.org/stable/10.1086/520938
         """
-
         # <P> for M spectra
         P = data[:, :self.M]
         s1 = np.sum(P, axis=1)
@@ -96,17 +123,18 @@ class SpectralKurtosis:
         return ((self.M * self.N * self.d + 1) / (self.M - 1)) * \
                ((self.M * (s2 / np.square(s1))) - 1.)
 
-    def single_scale(self, data, M):
-        """
-        Calculates the single-scale Spectral Kurtosis routine as specified in
+    def single_scale(self, data, M=None):
+        """Calculate the single-scale Spectral Kurtosis routine.
+
+        Perform single-scale spectral kurtosis as specified in the papers
         Smith 2022 and Nita 2010.
 
         Parameters
         ----------
         data : 2D array-like
             Input data of the format (channels, spectra)
-        M : int, optional
-            spectral kurtosis M-value
+        M : int or None, optional
+            spectral kurtosis M-value. If None, the class M attribute will be used.
 
         Returns
         -------
@@ -118,6 +146,8 @@ class SpectralKurtosis:
         Section 1.6 Spectral Kurtosis, eqns 1.23-1.32 of Smith 2020
         https://researchrepository.wvu.edu/etd/11467
         """
+        if M is None:
+            M = self.M
 
         num_spectra = data.shape[1] // M
 
@@ -138,21 +168,23 @@ class SpectralKurtosis:
         data : 2D array-like
         w :
         """
-
         kurtosis = np.array([self.sk_estimator(i) for i in data.T])
         thresh = (1. + 100/data.T.shape[1]) * np.nanmedian(kurtosis)
         w[:, kurtosis >= thresh] = 0
         return kurtosis, w
 
-    def estimate_threshold(self, data, rho=0.0013499):
-        """
-        Estimates the upper and lower thresholds of the function using
+    def estimate_threshold(self, data, rho: float = 0.0013499):
+        r"""Estimate the upper and lower thresholds of the spectral curve.
+
+        Finds the threshold values of the Pearson III CDF and Pearson III CCDF
+        using the `scipy.optimize` root solver function.
 
         Parameters
         ----------
         data : array-like
         rho : float, optional
              1 - 3$\sigma$ = 0.0013499
+
         Returns
         -------
         upper : int
@@ -167,15 +199,13 @@ class SpectralKurtosis:
 
         .. math: $\alpha = \frac{\mu_3}{2 \mu_2}$
         .. math: $\beta = \frac{4 \mu_2^3}{mu_3 ** 2}$
-        delta = 1 - (2 * mu_2 ** 2) / mu_3
+        .. math: $\delta = 1 - \frac{2 \mu_2^2}{\mu_3}$
 
-        # k = (beta_1 * (beta_2 + 3) ** 2) \
-        #   / (4 * (4 * beta_2 - 3 * beta_1) * (2 * beta_2 - 3 * beta_1 - 6))
+        .. math: $\kappa = \frac{\beta_1 (\beta_2 + 3)^2}{4 (4 \beta_2 - 3 \beta_1)(2 \beta_2 - 3\beta_1 - 6)}
         """
-
         mu_2 = np.var(data)
         mu_3 = skew(data)
-        mu_4 = kurtosis(data)
+        _mu_4 = kurtosis(data)
 
         upper = fsolve(self.pearson3_ccdf(), 1, args=(mu_2, mu_3, rho))
         lower = fsolve(pearson3.cdf(), 1, args=(mu_2, mu_3, rho))

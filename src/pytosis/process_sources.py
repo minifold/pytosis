@@ -10,7 +10,6 @@ import os
 import numpy as np
 from astropy.io import fits
 from astropy.stats import histogram
-from scipy.stats import pearson3
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -19,8 +18,7 @@ from kurtosis import SpectralKurtosis as SK
 
 
 def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
-    """
-    Reads in a FITS file and creates a variety of plots of the data.
+    r"""Read in a FITS file and create a variety of plots of the data.
 
     Parameters
     ----------
@@ -34,7 +32,6 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
     showplot : boolean, optional
         Determines whether the 2-D plotting image is shown.
     """
-
     # First check if file exists.
     # We will assume that data is being stored in the `pdev` directory:
     # We want to accept the string whether its an absolute path or a relative path.
@@ -50,7 +47,7 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
         cols = len(f[1].data['DATA'][0])
         # Find the polarizations and save that to pols.
         # Easier than converting to a 2D datacube and then reconverting it back
-        pols = cols // 2
+        _pols = cols // 2
 
         data = np.zeros((rows, cols))
         print(rows, cols)
@@ -74,8 +71,7 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
 
 
 def histbins(M, sk):
-    """
-    """
+    """Find the bin values for the histogram."""
     # When M = 300 seconds
     if (M == 300):
         sample = sk[np.where(sk < 1.5)]
@@ -88,22 +84,23 @@ def histbins(M, sk):
 
 def process_source_on_off(data, M, source_nums, channels=16384, wlen=1450,
                           bandlen=400):
-    """
+    """Process the psuedo ON OFF sources from the Arecibo 12m telescope.
+
     Parameters
     ----------
     data : array-like
-    M :
+    M : number of
     source_nums :
         number of sources.
     channels : int, optional
         The number of channels in the FITS file.
     wlen : int, optional
+    bandlen : int or None, optional
+        This variable represents the length of the band artifact that is
+        present on all 12 meter data at Arecibo. If a telescope does not have
+        this specific band shape, this may be set to `None`.
     """
-
-    # TODO This variable represents the length of the band artifact that is
-    # present on all 12 meter data at Arecibo.
-    # If a telescope does not have this specific band shape, this may be set to
-    # `None`. There should probably be a better default here.
+    # There should probably be a better default here.
     if bandlen is None:
         bandlen = 0
 
