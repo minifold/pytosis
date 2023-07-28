@@ -104,7 +104,7 @@ def med_filter(data, boxes: int = 6, showplot: bool = False):
 
     med = median_filter(data, 6)
 
-    if showplot == True:
+    if showplot is True:
         plt.plot(med)
         plt.show()
 
