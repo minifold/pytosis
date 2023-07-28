@@ -9,9 +9,6 @@ phi = 0.0; % OLS
 
 xm = xClass;
 
-% figure(fig_indx)
-% bar(xClass,ym./(ym_total*binWidth),1)
-% hold on
 x = [xClass(1):0.01:xClass(end)]';
 
 m = size(ym,1);
@@ -24,16 +21,9 @@ wm = ones(m,1);
 %
 %  minimize  f(x) = sum_i  wm(i)^2 ( yth(tm(i),x) - ym(i) )^2
 
-% initial parameters guess
-% x0 = [1.5 ; 0.8];
-% q0 = [mean_mu^2/var_sigma; var_sigma/mean_mu]; % gamma pdf
 q0 = [moment3/(2*moment2); (4*moment2^3)/(moment3^2); 1 - (2*moment2^2)/(moment3)]; % gamma pdf
-%  q0 = [mean_mu; sqrt(var_sigma)]; % normal pdf & log-normal pdf & Logistic pdf
-% q0 = [1; 1];
-
 % in the first examples, we define the function fun and dfun
 % in scilab language
-
 % now we could call leastsq:
 
 % 1- the simplest call
@@ -46,10 +36,6 @@ options = optimset('MaxFunEvals',1000,'MaxIter',1000,'Display','off');
 while(i == 1 | norm(q_opt - q) > toll_err & i <= 200)
 
     q = q_opt;
-
-%     [q_opt] = lsqnonlin(@(q) myfun(q, xm, ym, wm), q0);
-%     [q_opt] = fminsearch(@(q) norm(sqrt(wm.^(q(3))).*(yth(xm, q)-ym))^2, q);
-
     [q_opt] = fminsearch(@(q) norm(sqrt(wm).*(yth(xm,binWidth,ym_total,q)-ym))^2, q,options);
     
 %     wm = yth(xm, q_opt).^(-2);

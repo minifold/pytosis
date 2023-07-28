@@ -278,25 +278,6 @@ end
 x = xm(iMin:iMax)+0.5*binWidth*ones(size(xm(iMin:iMax)));
 ym_new = ym(iMin:iMax)';
 
-% ii = find(ym==max(ym));
-% iMax = min(find(ym(ii:end)==0));
-% iMin = max(find(ym(1:ii)==0));
-% if(~isempty(iMin) & ~isempty(iMax))
-%     iMax = iMax+ii-1;
-%     x = xm(iMin:iMax)+0.5*binWidth*ones(size(xm(iMin:iMax)));
-%     ym_new = ym(iMin:iMax)';
-% elseif(~isempty(iMin))
-%     x = xm(iMin:end-1)+0.5*binWidth*ones(size(xm(iMin:end-1)));
-%     ym_new = ym(iMin:end)';
-% elseif(~isempty(iMax))
-%     iMax = iMax+ii-1;
-%     x = xm(1:iMax)+0.5*binWidth*ones(size(xm(1:iMax)));
-%     ym_new = ym(1:iMax)';
-% else
-%     x = xm(1:end-1)+0.5*binWidth*ones(size(xm(1:end-1)));
-%     ym_new = ym;
-% end
-
 x_min = a;
 x_max = b;
 y_min = min(y_min,min(ym_new));
@@ -387,15 +368,6 @@ channelNumberFlaggedGreen = [channelNumberFlaggedGreen, [find(SKGreen(1,:) < low
 
 tableDataMod = tableData;
 
-% for k = 1:length(channelNumberFlaggedRed)
-
-% for i=1:M
-% tableDataMod{1,1,j}{i,1}(channelNumberFlaggedRed(k)) = NaN;
-
-% end
-
-
-% end
 AMod = A;
 AMod(:,channelNumberFlaggedRed) = NaN;
 
@@ -409,60 +381,10 @@ AMod(:,channelNumberFlaggedRed) = NaN;
 BMod = B;
 BMod(:,channelNumberFlaggedGreen) = NaN;
 
-% totalNumOfFiles = finalIndex-initialIndex+1;
-% filenameMod = cell(totalNumOfFiles,1);
-% for k = 1:size(filename)
-%     if(numel(num2str(initialIndex+k-1)) == 2)
-%         filenameMod(k,1) = {['a4002.20230626.b0s1g0.0',num2str(initialIndex+k-1),'00.Mod.fits']};
-%     elseif(numel(num2str(initialIndex+k)) == 3)
-%         filenameMod(k,1) = {['a4002.20230626.b0s1g0.',num2str(initialIndex+k-1),'00.Mod.fits']}
-%     end
-%
-%     % Extract the info of the fits document
-%     info = fitsinfo(filename{k,1});
-%     rowend = info.BinaryTable.Rows;
-%     M = rowend;
-%     % % Red Polarization
-%     % A = zeros(M,16384/2);
-%     % % Green Polarization
-%     % B = zeros(M,16384/2);
-%     % for i=1:M
-%     %     auxVec = tableDataMod{1,1,k}{i,1};
-%     %     A(i,:) = auxVec(1:(16384/2));
-%     %     B(i,:) = auxVec((16384/2 +1):end);
-%     % end
-%
-%     % Red Polarization
-%     A = zeros(M,16384/2-windlength*2);
-%     % Green Polarization
-%     B = zeros(M,16384/2-windlength*2);
-%     for i=1:M
-%         auxVec = tableDataMod{1,1,k}{i,1};
-%         A(i,:) = auxVec(windlength+1:((16384/2)-windlength));
-%         B(i,:) = auxVec((16384/2+1+windlength):(end-windlength));
-%     end
-%
-%
-%
-%
-%     % fitswrite(tableDataMod(1,1:2,i),filename{i,1});
-%     fitswrite([A,B],filenameMod{k,1});
-% end
-
 if(1)
     x = [(windlength+1):((16384/4)-middleBandlength),((16384/4 + 1)+middleBandlength):((16384/2)-windlength)];
     figure(4)
     for i=1:M
-        % auxVec = tableData{1,1,j}{i,1};
-        % plot(x,auxVec(1:(16384/2)),'r')
-        % hold on
-        % plot(x,auxVec((16384/2 +1):end),'g')
-        % hold on
-        % auxVec = tableData{1,1,j}{i,1};
-        % plot(x,auxVec(windlength+1:((16384/2)-windlength)),'r')
-        % hold on
-        % plot(x,auxVec((16384/2+1+windlength):(end-windlength)),'g')
-        % hold on
         subplot(2,2,1)
         plot(x,A(i,:),'rx')
         hold on
@@ -494,48 +416,6 @@ if(1)
     end
 
 end
-
-% figure(5)
-% subplot(2,1,1)
-% for i=1:M
-%     % auxVec = tableData{1,1,j}{i,1};
-%     % plot(x,auxVec(1:(16384/2)),'r')
-%     % hold on
-%     % plot(x,auxVec((16384/2 +1):end),'g')
-%     % hold on
-%     % auxVec = tableData{1,1,j}{i,1};
-%     % plot(x,auxVec(windlength+1:((16384/2)-windlength)),'r')
-%     % hold on
-%     % plot(x,auxVec((16384/2+1+windlength):(end-windlength)),'g')
-%     % hold on
-%     plot(x,A(i,:),'rx')
-%     hold on
-%     plot(x,B(i,:),'gx')
-%     hold on
-%
-% end
-% xlim([min(x)-1, max(x)+1])
-% ylim([0.8*10^6, 2.0*10^6])
-%
-% subplot(2,1,2)
-% for i=1:M
-%     % auxVec = tableDataMod{1,1,j}{i,1};
-%     % plot(x,auxVec(1:(16384/2)),'r')
-%     % hold on
-%     % plot(x,auxVec((16384/2 +1):end),'g')
-%     % hold on
-%     % auxVec = tableDataMod{1,1,j}{i,1};
-%     % plot(x,auxVec(windlength+1:((16384/2)-windlength)),'r')
-%     % hold on
-%     % plot(x,auxVec((16384/2+1+windlength):(end-windlength)),'g')
-%     % hold on
-%     plot(x,AMod(i,:),'rx')
-%     hold on
-%     plot(x,BMod(i,:),'gx')
-%     hold on
-% end
-% xlim([min(x)-1, max(x)+1])
-% ylim([0.8*10^6, 2.0*10^6])
 
 disp(['Pearson Criterion (Red): ',num2str(kappaRed)])
 % Display the mean of teh SK distribution
