@@ -205,7 +205,7 @@ class SpectralKurtosis:
         The location parameter is defined as:
         .. math: $\delta = 1 - \frac{2 \mu_2^2}{\mu_3}$
         The Pearson Criterion is defined as (Pearson 1985):
-        .. math: $\kappa = \frac{\beta_1 (\beta_2 + 3)^2}{4 (4 \beta_2 - 3 \beta_1)(2 \beta_2 - 3\beta_1 - 6)}
+        .. math: $\kappa = \frac{\beta_1 (\beta_2 + 3)^2}{4 (4 \beta_2 - 3 \beta_1)(2 \beta_2 - 3\beta_1 - 6)}$
         When $\kappa$ is > 1, the Pearson distribution is type III.
         """
         mu_2 = np.var(data)
