@@ -1,1 +1,3 @@
 src/pytosis/RFIreducer.py
+__pycache__
+poetry.lock
