@@ -5,7 +5,24 @@ site_author: Alex Cingoranelli
 site_description: 
 repo_url: https://github.com/minifold/pytosis
 
-theme: 
-  name: material
-language: en
+edit_uri: edit/main/docs/
 
+theme:
+  name: material
+  font:
+    code: Fira Code
+  custom_dir: overrides
+  features:
+    - content.action.edit
+    - announce.dismiss
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+
+  language: en
+markdown_extensions:
+  - footnotes
+  - abbr
+  - admonition
+  - def_list
