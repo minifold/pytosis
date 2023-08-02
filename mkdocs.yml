@@ -11,7 +11,7 @@ theme:
   name: material
   font:
     code: Fira Code
-  custom_dir: overrides
+  custom_dir: docs/material/.overrides
   features:
     - content.action.edit
     - announce.dismiss
