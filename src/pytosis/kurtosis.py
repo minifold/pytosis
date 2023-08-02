@@ -166,8 +166,18 @@ class SpectralKurtosis:
         return out_sk, out_s
 
     def sk_edit(self, data, w):
-        """
+        """Edit the data to crop out any values above or below the given threshold.
+
+        A more simple method to edit than using the pearson values to find the threshold.
+
+        Parameters
+        ----------
         data : 2D array-like
+        w :
+
+        Returns
+        -------
+        kurtosis : array-like
         w :
         """
         kurtosis = np.array([self.sk_estimator(i) for i in data.T])
