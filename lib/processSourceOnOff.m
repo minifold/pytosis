@@ -10,8 +10,17 @@ format long g
 
 j=fileNumberOfSourceOnOff;
 
+% windlength = 0;
+% windlength = 500;
 windlength = 1450;
+% windlength = 1700;
+% windlength = 1550;
+% windlength = 1500;
+% windlength = 1000;
+% windlength = 2000;
 
+% middleBandlength = 0;
+% middleBandlength = 225;
 middleBandlength = 400;
 
 % Red Polarization
@@ -30,6 +39,11 @@ for i=1:M
     % B(i,:) = auxVec((16384/2+1+windlength):(end-windlength));
     A(i,:) = auxVec([(windlength+1):((16384/4)-middleBandlength),((16384/4 + 1)+middleBandlength):((16384/2)-windlength)]);
     B(i,:) = auxVec([(16384/2+1+windlength):(3*(16384/4)-middleBandlength),(3*(16384/4)+1+middleBandlength):(end-windlength)]);
+    % plot(x,A(i,:),'rx')
+    % hold on
+    % plot(x,B(i,:),'gx')
+    % hold on
+    % xlim([min(x)-1, max(x)+1])
 end
 
 S1Red = sum(A,1);
@@ -52,27 +66,26 @@ muGreen = mean(B,1);
 varianceRed = var(A,0,1);
 varianceGreen = var(B,0,1);
 
-dRed = muRed.^2./median(varianceRed);
-dGreen = muGreen.^2./median(varianceGreen);
+N = 2929; % Number of instantaneous PSD considered for the average.
+dRed = muRed.^2./(varianceRed.*N);
+dGreen = muGreen.^2./(varianceGreen.*N);
+% dRed = ones(size(dRed)).*mean(dRed);
+% dGreen = ones(size(dGreen)).*mean(dGreen);
+dRed = ones(size(dRed)).*median(dRed);
+dGreen = ones(size(dGreen)).*median(dGreen);
+
+
+% dRed = muRed.^2./(varianceRed*N);
+% dGreen = muGreen.^2./(varianceGreen*N);
 
 % % % Method 4 mean(Variance across all channels)
 % dRed = mean(muRed)^2/median(varianceRed);
 % dGreen = mean(muGreen)^2/median(varianceGreen);
 
-N = 1;
+
 % Spectral Kurtosis
 SKRed = ((M*N*dRed + 1)./(M - 1)).*(M*S2Red./(S1Red.^(2))-1);
 SKGreen = ((M*N*dGreen + 1)./(M - 1)).*(M*S2Green./(S1Green.^(2))-1);
-
-% figure(1)
-% subplot(2,1,1)
-% histogram(SKRed)
-% subplot(2,1,2)
-% histogram(SKGreen)
-%
-% pause
-
-
 
 % % Case d= 1 (Exponential);
 % SKRed = ( (M + 1)/(M - 1) )*( (M*S2Red./(S1Red.^(2))) -1 );
@@ -104,11 +117,15 @@ subplot(2,3,1)
 if(M == 300)
     sample = SKRed(find(SKRed<1.5));
 else
-    sample = SKGreen(find(SKRed<5));
+    sample = SKRed(find(SKRed<3));
 end
 a = min(sample);
 b = max(sample);
+% ym = histcounts(sample,xClass);
+% [ym, xClass] = histcounts(sample,'BinMethod','fd','Normalization','pdf','BinLimits',[a,b]);
 [ym, xClass] = histcounts(sample,'BinMethod','scott','Normalization','pdf','BinLimits',[a,b]);
+% [ym, xClass] = histcounts(sample,'BinMethod','sturges','Normalization','pdf','BinLimits',[a,b]);
+% [ym, xClass] = histcounts(sample,'BinMethod','sqrt','Normalization','pdf','BinLimits',[a,b]);
 sampleMeanSKRed = mean(sample);
 
 xm = xClass';
@@ -153,6 +170,7 @@ ym_new = ym(iMin:iMax)';
 %     x = xm(1:end-1)+0.5*binWidth*ones(size(xm(1:end-1)));
 %     ym_new = ym;
 % end
+
 
 % % Red Polarization histogram and best fit curve
 % sample = SKRed(find(SKRed<1.5));
@@ -202,8 +220,8 @@ y_max = max(ym_new);
 
 q_OLSRed = leastSqPearsonTypeIIIDist(x,ym_new,sum(ym_new),var(sample,0),skewness(sample,0));
 [lowerThresholdRed upperThresholdRed] = thresholdsEstimator(sample,dRed,q_OLSRed,1);
-
-% % Display the mean of the SK distribution
+figure(2)
+% % Display the mean of teh SK distribution
 % disp(['Expected value of SKRed dist: ',num2str(q_OLSRed(1)*q_OLSRed(2)+q_OLSRed(3))])
 
 % pause
@@ -245,7 +263,7 @@ subplot(2,3,4)
 if(M == 300)
     sample = SKGreen(find(SKGreen<1.5));
 else
-    sample = SKGreen(find(SKGreen<5));
+    sample = SKGreen(find(SKGreen<3));
 end
 a = min(sample);
 b = max(sample);
@@ -278,6 +296,25 @@ end
 x = xm(iMin:iMax)+0.5*binWidth*ones(size(xm(iMin:iMax)));
 ym_new = ym(iMin:iMax)';
 
+% ii = find(ym==max(ym));
+% iMax = min(find(ym(ii:end)==0));
+% iMin = max(find(ym(1:ii)==0));
+% if(~isempty(iMin) & ~isempty(iMax))
+%     iMax = iMax+ii-1;
+%     x = xm(iMin:iMax)+0.5*binWidth*ones(size(xm(iMin:iMax)));
+%     ym_new = ym(iMin:iMax)';
+% elseif(~isempty(iMin))
+%     x = xm(iMin:end-1)+0.5*binWidth*ones(size(xm(iMin:end-1)));
+%     ym_new = ym(iMin:end)';
+% elseif(~isempty(iMax))
+%     iMax = iMax+ii-1;
+%     x = xm(1:iMax)+0.5*binWidth*ones(size(xm(1:iMax)));
+%     ym_new = ym(1:iMax)';
+% else
+%     x = xm(1:end-1)+0.5*binWidth*ones(size(xm(1:end-1)));
+%     ym_new = ym;
+% end
+
 x_min = a;
 x_max = b;
 y_min = min(y_min,min(ym_new));
@@ -285,7 +322,7 @@ y_max = max(y_max,max(ym_new));
 
 q_OLSGreen = leastSqPearsonTypeIIIDist(x,ym_new,sum(ym_new),var(sample,0),skewness(sample,0));
 [lowerThresholdGreen upperThresholdGreen] = thresholdsEstimator(sample,dGreen,q_OLSGreen,2);
-
+figure(2)
 % % Display the mean of teh SK distribution
 % disp(['Expected value of SKGreen dist: ',num2str(q_OLSGreen(1)*q_OLSGreen(2)+q_OLSGreen(3))])
 
@@ -368,6 +405,15 @@ channelNumberFlaggedGreen = [channelNumberFlaggedGreen, [find(SKGreen(1,:) < low
 
 tableDataMod = tableData;
 
+% for k = 1:length(channelNumberFlaggedRed)
+
+% for i=1:M
+% tableDataMod{1,1,j}{i,1}(channelNumberFlaggedRed(k)) = NaN;
+
+% end
+
+
+% end
 AMod = A;
 AMod(:,channelNumberFlaggedRed) = NaN;
 
@@ -381,10 +427,60 @@ AMod(:,channelNumberFlaggedRed) = NaN;
 BMod = B;
 BMod(:,channelNumberFlaggedGreen) = NaN;
 
+% totalNumOfFiles = finalIndex-initialIndex+1;
+% filenameMod = cell(totalNumOfFiles,1);
+% for k = 1:size(filename)
+%     if(numel(num2str(initialIndex+k-1)) == 2)
+%         filenameMod(k,1) = {['a4002.20230626.b0s1g0.0',num2str(initialIndex+k-1),'00.Mod.fits']};
+%     elseif(numel(num2str(initialIndex+k)) == 3)
+%         filenameMod(k,1) = {['a4002.20230626.b0s1g0.',num2str(initialIndex+k-1),'00.Mod.fits']}
+%     end
+%
+%     % Extract the info of the fits document
+%     info = fitsinfo(filename{k,1});
+%     rowend = info.BinaryTable.Rows;
+%     M = rowend;
+%     % % Red Polarization
+%     % A = zeros(M,16384/2);
+%     % % Green Polarization
+%     % B = zeros(M,16384/2);
+%     % for i=1:M
+%     %     auxVec = tableDataMod{1,1,k}{i,1};
+%     %     A(i,:) = auxVec(1:(16384/2));
+%     %     B(i,:) = auxVec((16384/2 +1):end);
+%     % end
+%
+%     % Red Polarization
+%     A = zeros(M,16384/2-windlength*2);
+%     % Green Polarization
+%     B = zeros(M,16384/2-windlength*2);
+%     for i=1:M
+%         auxVec = tableDataMod{1,1,k}{i,1};
+%         A(i,:) = auxVec(windlength+1:((16384/2)-windlength));
+%         B(i,:) = auxVec((16384/2+1+windlength):(end-windlength));
+%     end
+%
+%
+%
+%
+%     % fitswrite(tableDataMod(1,1:2,i),filename{i,1});
+%     fitswrite([A,B],filenameMod{k,1});
+% end
+
 if(1)
     x = [(windlength+1):((16384/4)-middleBandlength),((16384/4 + 1)+middleBandlength):((16384/2)-windlength)];
-    figure(4)
+h =     figure(4);
     for i=1:M
+        % auxVec = tableData{1,1,j}{i,1};
+        % plot(x,auxVec(1:(16384/2)),'r')
+        % hold on
+        % plot(x,auxVec((16384/2 +1):end),'g')
+        % hold on
+        % auxVec = tableData{1,1,j}{i,1};
+        % plot(x,auxVec(windlength+1:((16384/2)-windlength)),'r')
+        % hold on
+        % plot(x,auxVec((16384/2+1+windlength):(end-windlength)),'g')
+        % hold on
         subplot(2,2,1)
         plot(x,A(i,:),'rx')
         hold on
@@ -405,6 +501,7 @@ if(1)
 
     for i=1:4
         subplot(2,2,i)
+        set(gca,'fontsize',fontSize)
         xlim([min(x)-1, max(x)+1])
         if(M == 300)
             ylim([0.9*10^6, 2.0*10^6])
@@ -416,6 +513,56 @@ if(1)
     end
 
 end
+subplot(2,2,1)
+ylabel('PSD')
+subplot(2,2,3)
+xlabel('Frequency Channel')
+ylabel('PSD')
+subplot(2,2,4)
+xlabel('Frequency Channel')
+% title('PSD spectra before and after RFI excision')
+
+% figure(5)
+% subplot(2,1,1)
+% for i=1:M
+%     % auxVec = tableData{1,1,j}{i,1};
+%     % plot(x,auxVec(1:(16384/2)),'r')
+%     % hold on
+%     % plot(x,auxVec((16384/2 +1):end),'g')
+%     % hold on
+%     % auxVec = tableData{1,1,j}{i,1};
+%     % plot(x,auxVec(windlength+1:((16384/2)-windlength)),'r')
+%     % hold on
+%     % plot(x,auxVec((16384/2+1+windlength):(end-windlength)),'g')
+%     % hold on
+%     plot(x,A(i,:),'rx')
+%     hold on
+%     plot(x,B(i,:),'gx')
+%     hold on
+%
+% end
+% xlim([min(x)-1, max(x)+1])
+% ylim([0.8*10^6, 2.0*10^6])
+%
+% subplot(2,1,2)
+% for i=1:M
+%     % auxVec = tableDataMod{1,1,j}{i,1};
+%     % plot(x,auxVec(1:(16384/2)),'r')
+%     % hold on
+%     % plot(x,auxVec((16384/2 +1):end),'g')
+%     % hold on
+%     % auxVec = tableDataMod{1,1,j}{i,1};
+%     % plot(x,auxVec(windlength+1:((16384/2)-windlength)),'r')
+%     % hold on
+%     % plot(x,auxVec((16384/2+1+windlength):(end-windlength)),'g')
+%     % hold on
+%     plot(x,AMod(i,:),'rx')
+%     hold on
+%     plot(x,BMod(i,:),'gx')
+%     hold on
+% end
+% xlim([min(x)-1, max(x)+1])
+% ylim([0.8*10^6, 2.0*10^6])
 
 disp(['Pearson Criterion (Red): ',num2str(kappaRed)])
 % Display the mean of teh SK distribution
@@ -433,5 +580,9 @@ disp(['Sample mean of SKGreen dist: ',num2str(sampleMeanSKGreen)])
 disp(['lowerThresholdGreen: ',num2str(lowerThresholdGreen)])
 disp(['upperThresholdGreen: ',num2str(upperThresholdGreen)])
 disp(['Number of flagged channels in the green polarization: ', num2str(length(channelNumberFlaggedGreen))])
+
+channelNumberFlaggedRed'
+
+channelNumberFlaggedGreen'
 
 end % function

@@ -7,8 +7,8 @@ Alex Cingoranelli, University of Central Florida
 """
 
 import numpy as np
-from scipy.stats import pearson3, skew, kurtosis
 from scipy.optimize import fsolve
+from scipy.stats import kurtosis, pearson3, skew
 
 
 class SpectralKurtosis:
@@ -16,11 +16,11 @@ class SpectralKurtosis:
 
     Methods
     -------
-    pearson3_ccdf(x, a, b, d)
-    sk_estimator(data)
-    single_scale(data, M=None)
-    sk_edit(data, w)
-    estimate_threshold(data, rho=0.0013499)
+    * pearson3_ccdf(x, a, b, d)
+    * sk_estimator(data)
+    * single_scale(data, M=None)
+    * sk_edit(data, w)
+    * estimate_threshold(data, rho=0.0013499)
     """
 
     def __init__(self, data=None, M: int = 300, N: int = 2929, d: [float, None] = None):
@@ -47,37 +47,39 @@ class SpectralKurtosis:
         self.data = data
         # the number of instantaneous FFT spectra taken by the mock spectrograph per second.
         self.N = N
-        self.d = d    #
-        self.M = M    # the number of seconds
+        self.d = d  #
+        self.M = M  # the number of seconds
 
         if self.data is not None:
             return self.sk_estimator(self.data)
 
     def pearson3_ccdf(x, a, b, d):
-        """Perform the complementary Pearson III CDF.
+        r"""Perform the complementary Pearson III CDF.
 
         Parameters
         ----------
         x : array-like
         a : float
-            alpha parameter
+            $\alpha$ shape parameter
         b : float
-            beta parameter
+            $\beta$ scale parameter
         d : float
-            delta parameter
+            $\delta$ location parameter
 
         Returns
         -------
         _ : array-like
         """
+        # TODO check that the values passed in here are in the correct order.
         return 1 - pearson3.cdf(x - d, a, b)
 
-    def sk_estimator(self, data):
+    def sk_estimator(self, data, dtype="averaged"):
         r"""Perform the spectral kurtosis estimation function $\textbb{\hat{SK}}$.
 
         The `sk_estimator` function makes several assumptions about the data:
         It is defined as:
         .. math: $\langle P \rangle = \Sum{P_i}_{i=1} / N$
+        For the Arecibo 12m telescope, the values are taken at
         Which is the PSD averaged over 24 * 2 MHz. One PSD will take 0.34 ms to complete.
 
         Parameters
@@ -110,18 +112,18 @@ class SpectralKurtosis:
         https://www.jstor.org/stable/10.1086/520938
         """
         # <P> for M spectra
-        P = data[:, :self.M]
+        P = data[:, : self.M]
         s1 = np.sum(P, axis=1)
         s2 = np.sum(np.square(P), axis=1)
 
         if self.d is None:
             self.d = np.mean(P, axis=1) ** 2 / (np.var(P, ddof=1) * self.N)
-            # Based on previous variance calculation where we take the median
-            # of the variance
-            # self.d = np.mean(a, axis=1) ** 2 / np.median(np.var(a, ddof=1))
+            self.d = np.ones(np.shape(d)) * np.median(d)
+            # In previous variance calculation, we divided by the median
+            # of the variance, which produced inconsistent approximations.
 
-        return ((self.M * self.N * self.d + 1) / (self.M - 1)) * \
-               ((self.M * (s2 / np.square(s1))) - 1.)
+        return ((self.M * self.N * self.d + 1) / (self.M - 1)) * (
+            (self.M * (s2 / np.square(s1))) - 1.0)
 
     def single_scale(self, data, M=None):
         """Calculate the single-scale Spectral Kurtosis routine.
@@ -152,7 +154,7 @@ class SpectralKurtosis:
         num_spectra = data.shape[1] // M
 
         for i in range(num_spectra):
-            s_i = data[:, i * M:(i + 1) * M]
+            s_i = data[:, i * M : (i + 1) * M]
 
             if i == 0:
                 out_sk = np.expand_dims(self.sk_estimator(s_i, M), axis=1)
@@ -169,7 +171,7 @@ class SpectralKurtosis:
         w :
         """
         kurtosis = np.array([self.sk_estimator(i) for i in data.T])
-        thresh = (1. + 100/data.T.shape[1]) * np.nanmedian(kurtosis)
+        thresh = (1.0 + 100 / data.T.shape[1]) * np.nanmedian(kurtosis)
         w[:, kurtosis >= thresh] = 0
         return kurtosis, w
 
@@ -195,13 +197,16 @@ class SpectralKurtosis:
         Notes
         -----
         .. math: $\beta_1 = \frac{\mu_3^2}{\mu_2^2}$
-        .. math: $\beta_2 = \frac{mu_4}{mu_2^2}$
-
+        .. math: $\beta_2 = \frac{\mu_4}{\mu_2^2}$
+        The scale parameter is defined as:
         .. math: $\alpha = \frac{\mu_3}{2 \mu_2}$
+        The shape parameter is defined as:
         .. math: $\beta = \frac{4 \mu_2^3}{mu_3 ** 2}$
+        The location parameter is defined as:
         .. math: $\delta = 1 - \frac{2 \mu_2^2}{\mu_3}$
-
+        The Pearson Criterion is defined as (Pearson 1985):
         .. math: $\kappa = \frac{\beta_1 (\beta_2 + 3)^2}{4 (4 \beta_2 - 3 \beta_1)(2 \beta_2 - 3\beta_1 - 6)}
+        When $\kappa$ is > 1, the Pearson distribution is type III.
         """
         mu_2 = np.var(data)
         mu_3 = skew(data)

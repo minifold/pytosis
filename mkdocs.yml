@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+site_name: Spectral Kurtosis
+site_author: Alex Cingoranelli
+site_description: 
+repo_url: https://github.com/minifold/pytosis
+
+theme: 
+  name: material
+language: en
+

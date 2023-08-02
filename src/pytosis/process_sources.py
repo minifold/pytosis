@@ -1,11 +1,10 @@
-"""
+"""Take a FITS file, perform spectral kurtosis, and plot the results. 
 
 Authors
 -------
 Alex Cingoranelli, University of Central Florida
 Dr. Emmanuel J. Morales Butler, University of Puerto Rico,
 """
-
 import os
 import numpy as np
 from astropy.io import fits
@@ -24,13 +23,16 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
     ----------
     fname : string
         File name that will be opened.
+    showplot : boolean, optional
+        Determines whether or not a plot will be created.
+    path : string
+        The path where the files may be stored. If a full path is given to fname
+        or if the data is in `/share/pdata1/pdev/`, this is not needed. 
 
     Returns
     -------
     data : 2d nparray
         Data of size (time, channels) to be analyzed.
-    showplot : boolean, optional
-        Determines whether the 2-D plotting image is shown.
     """
     # First check if file exists.
     # We will assume that data is being stored in the `pdev` directory:
@@ -70,8 +72,24 @@ def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):
     return data
 
 
-def histbins(M, sk):
-    """Find the bin values for the histogram."""
+def histbins(M, sk, showplot=False):
+    """Find the bin values for the histogram.
+
+    Parameters
+    ----------
+    M : int
+        number of spectra
+    sk : 1D array-like
+        spectral kurtosis estimated data.
+    showplot : boolean, optional
+        Determines whether or not to show a histogram. Defaults to False.
+
+    Returns
+    -------
+    ym :
+    bin_edges : 1D array-like
+        Upper and lower bounds for each bin.
+    """
     # When M = 300 seconds
     if (M == 300):
         sample = sk[np.where(sk < 1.5)]
@@ -79,6 +97,11 @@ def histbins(M, sk):
         sample = sk[np.where(sk < 5.0)]
 
     ym, bin_edges = histogram(sample, bins="scott", density=True)
+
+    if showplot is True:
+        plt.hist(ym, bin_edges)
+        plt.show()
+
     return ym, bin_edges
 
 
