@@ -2,7 +2,7 @@
 
 site_name: Spectral Kurtosis
 site_author: Alex Cingoranelli
-site_description: 
+site_description: RFI Reduction Package using the Spectral Kurtosis method.
 repo_url: https://github.com/minifold/pytosis
 
 edit_uri: edit/main/docs/
@@ -19,8 +19,16 @@ theme:
     - content.code.annotate
     - content.code.copy
     - content.code.select
-
   language: en
+
+nav:
+  - index.md
+  - tutorials.md
+  - reference.md
+
+plugins:
+  - mkdocstrings
+
 markdown_extensions:
   - footnotes
   - abbr
