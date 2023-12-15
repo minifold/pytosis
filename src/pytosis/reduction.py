@@ -1,4 +1,4 @@
-"""
+"""Various RFI reduction techniques that can be applied as a quick
 """
 import os
 from itertools import islice
@@ -130,7 +130,6 @@ def plot_polarizations(data, time=0, y_lim=[1e6, 5e6]) -> None:
     y_lim : list (2,)
         * lower bound y limit
         * upper bound y limit
-
     """
     (rows, pnum, cols) = data.shape
     pols = cols // 2
