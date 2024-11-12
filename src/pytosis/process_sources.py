@@ -1,4 +1,4 @@
-"""Take a FITS file, perform spectral kurtosis, and plot the results. 
+"""Take a FITS file, perform spectral kurtosis, and plot the results.
 
 Authors
 -------
@@ -13,7 +13,7 @@ from astropy.stats import histogram
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-from kurtosis import SpectralKurtosis as SK
+from pytosis.kurtosis import SpectralKurtosis as SK
 
 
 def read_fits(fname, showplot=False, path="/share/pdata1/pdev/"):

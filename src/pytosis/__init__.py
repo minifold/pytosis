@@ -1,4 +1,4 @@
-# pytosis/__init__.py
+#!/usr/bin/env python3
 """Package for excising unwanted signals using the spectral kurtosis method.
 
 Radio-frequency interference (RFI) is any source of transmission that is
@@ -13,3 +13,8 @@ Modules exported by this package:
 - `cli`: The command-line interface for working with files.
 - `process sources`: Provides methods for reading and manipulating Arecibo FITS files.
 """
+# read version from installed package
+from importlib.metadata import version
+
+__version__ = version("pytosis")
+
