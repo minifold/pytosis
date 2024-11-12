@@ -11,7 +11,6 @@ theme:
   name: material
   font:
     code: Fira Code
-  custom_dir: docs/material/.overrides
   features:
     - content.action.edit
     - announce.dismiss
@@ -22,12 +21,19 @@ theme:
   language: en
 
 nav:
-  - index.md
-  - tutorials.md
-  - reference.md
+  - Home: index.md
+  - API: api.md
+  - Tutorials: tutorials.md
+  - References: reference.md
 
 plugins:
-  - mkdocstrings
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          selection:
+            docstring_style: "numpy"
 
 markdown_extensions:
   - footnotes

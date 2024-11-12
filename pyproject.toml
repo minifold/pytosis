@@ -7,12 +7,18 @@ license = "MIT"
 readme = "README.org"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.9"
 astropy = ">=4.3.1"
 scipy = ">=1.2.1"
 matplotlib = ">=3.0.0"
 mkdocs = "^1.5.1"
 mkdocs-material = "^9.1.21"
+mkdocstrings-python = "^1.12.2"
+
+[tool.poetry.group.dev.dependencies]
+mkdocstrings = "^0.27.0"
+mkdocs-material = "^9.5.44"
+pytkdocs = {version = "^0.16.2", extras = ["numpy-style"]}
 
 [tool.ruff]
 select = [
