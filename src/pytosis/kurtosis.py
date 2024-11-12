@@ -73,7 +73,7 @@ class SpectralKurtosis:
         # TODO check that the values passed in here are in the correct order.
         return 1 - pearson3.cdf(x - d, a, b)
 
-    def sk_estimator(self, data, dtype="averaged"):
+    def sk_estimator(self, data, axis=0, dtype="averaged"):
         r"""Perform the spectral kurtosis estimation function $\textbb{\hat{SK}}$.
 
         The `sk_estimator` function makes several assumptions about the data:
@@ -113,11 +113,11 @@ class SpectralKurtosis:
         """
         # <P> for M spectra
         P = data[:, : self.M]
-        s1 = np.sum(P, axis=1)
-        s2 = np.sum(np.square(P), axis=1)
+        s1 = np.sum(P, axis=axis)
+        s2 = np.sum(np.square(P), axis=axis)
 
         if self.d is None:
-            self.d = np.mean(P, axis=1) ** 2 / (np.var(P, ddof=1) * self.N)
+            self.d = np.mean(P, axis=axis) ** 2 / (np.var(P, ddof=1) * self.N)
             self.d = np.ones(np.shape(d)) * np.median(d)
             # In previous variance calculation, we divided by the median
             # of the variance, which produced inconsistent approximations.
