@@ -5,15 +5,23 @@
 
 * Getting Started
 * Installation
-Package will be posted to PyPI. It should be a simple case of running
+This package will be posted to PyPI. It's managed using poetry. Once published, it should be a simple case of running
 
 #+begin_src bash
 pip install pytosis
 #+end_src
 
-* Using the Command Line
+* Configuration
+** Using a Config file
+A configuration file 
+** Using the Command Line
 * Development
+Download the code from github. 
+#+begin_src bash
+git clone git@github.com:minifold/pytosis.git .
+#+end_src
+
 ** Requirements
-Development of the code requires backwards compatibility to Python 3.7.
+Development of this codebase requires at least Python 3.7, but preferrably 3.11. 
 
 * References
