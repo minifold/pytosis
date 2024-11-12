@@ -1,3 +1,1 @@
 # Reference
-
-::: kurtosis.kurtosis
