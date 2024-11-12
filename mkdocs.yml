@@ -18,16 +18,32 @@ theme:
     - content.code.annotate
     - content.code.copy
     - content.code.select
+    - content.tooltips
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - toc.follow
   language: en
 
 nav:
   - Home: index.md
-  - API: api.md
+  - Getting Started:
+    - getting_started/index.md
   - Tutorials: tutorials.md
-  - References: reference.md
+  - Reference: reference/
+
+watch:
+  - src/pytosis
 
 plugins:
-  - search
+  - search:
+    lang: en
+  - gen-files:
+    scripts:
+      - docs/generate_refs.py
+  - literate-nav:
+    nav_file: summary.md
   - mkdocstrings:
       default_handler: python
       handlers:
