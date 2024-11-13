@@ -31,7 +31,12 @@ jobs:
           restore-keys: |
             poetry-$
       #  - run: pip install mkdocs-material mkdocstrings-python
-      - run: source $VENV
+
+      - name: activate virtualenv
+        run: |
+          . .venv/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
+
       - name: install deps with poetry
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
