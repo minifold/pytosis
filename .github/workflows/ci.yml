@@ -23,6 +23,16 @@ jobs:
           restore-keys: |
             mkdocs-material-
 
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ~/.virtualenvs
+          key: poetry-$
+          restore-keys: |
+            poetry-$
       #  - run: pip install mkdocs-material mkdocstrings-python
-      - run: poetry install
+      - name: install deps with poetry
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - run: mkdocs gh-deploy --force
