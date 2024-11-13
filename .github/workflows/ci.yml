@@ -34,6 +34,8 @@ jobs:
 
       - name: activate virtualenv
         run: |
+          pip install --upgrade pip
+          python3 -m venv env
           . .venv/bin/activate
           echo PATH=$PATH >> $GITHUB_ENV
 
